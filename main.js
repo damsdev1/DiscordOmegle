@@ -10,7 +10,7 @@ client.login(config.token);
 
 // Init Number Randomizer
 var MersenneTwister = require("mersenne-twister");
-const { Console } = require("console");
+const logger = new console.Console(process.stdout, process.stderr);
 var generator = new MersenneTwister();
 
 
@@ -30,29 +30,29 @@ function getUptime(){
     } else {
         time = hours + "h";
     }
-    Console.info("⬤   Uptime :" + time);
+    logger.info("⬤   Uptime :" + time);
     setTimeout( () => {
         getUptime();
     }, 24*60*60*1000);
 }
 
 
-function createChannel(state){
-    state.guild.channels.create("Vocal #" + Math.floor(generator.random()*10000), {
+function createChannel(guild, channel){
+    guild.channels.create("Vocal #" + Math.floor(generator.random()*10000), {
         type: "voice",
         userLimit: 2,
         parent: config.categoryID,
         permissionOverwrites: [
             {
-                id: state.channel.guild.id,
+                id: channel.guild.id,
                 deny: ["VIEW_CHANNEL"],
             },
         ]
     }).then( (vc) => {
-        for (const [memberID, member] of state.channel.members) {
-            member.voice.setChannel(vc).catch( (err) => { Console.log(err); });
+        for (const [memberID, member] of channel.members) {
+            member.voice.setChannel(vc).catch( logger.error );
         }
-    }).catch( (err) => { Console.log(err); });
+    }).catch( logger.error);
 }
 
 // Verify if empty channel exist every 30s -> delete if true
@@ -61,7 +61,7 @@ function verifyVC(){
 
     for (const [channelID, channel] of channels) {
         if(channel.members.size === 0){
-            channel.delete("making room for new channels").catch( (err) => { Console.log(err); });
+            channel.delete("making room for new channels").catch( logger.error);
         }
     }
     setTimeout( () => {
@@ -77,12 +77,10 @@ function dbCacheAddMatch(memberID, matchID){
 // Verify if match exist in local databse
 function dbCacheVerifyMatch(memberID, matchID){
     var cache = dbcache.get(`match_${memberID}-${matchID}`);
-    Console.log(cache);
     if(cache){
         return true;
     } else {
         cache = dbcache.get(`match_${matchID}-${memberID}`);
-        Console.log(cache);
         if(cache) {
             return true;
         } else {
@@ -94,24 +92,40 @@ function dbCacheVerifyMatch(memberID, matchID){
 // Verify Update Github
 function updaterCheck(){
     var pjson = require("./package.json");
-    var versionProject = pjson.version;
+    var versionProject = pjson.version
+
+    function compareVersions(version1, version2) {
+
+        version1 = version1.split('.');
+        version2 = version2.split('.');
+    
+        var maxSubVersionLength = String(Math.max.apply(undefined, version1.concat(version2))).length;
+    
+        var reduce = function(prev, current, index) {
+    
+            return parseFloat(prev) + parseFloat('0.' + Array(index + (maxSubVersionLength - String(current).length)).join('0') + current);
+        };
+    
+        return version1.reduce(reduce) < version2.reduce(reduce);
+    }
+    
 
     const https = require("https");
     const options = {
         hostname: "raw.githubusercontent.com",
         port: 443,
-        path: "/DamsDev1/test/main/.version.json",
+        path: "/DamsDev1/DiscordOmegle/main/.version",
         method: "GET"
     };
     const req = https.request( options, (res) => {      
         res.on("data", (versionRemote) => {
-            if(versionRemote > versionProject){
-                Console.log("An update is : https://github.com/DamsDev1/test");
+            if(compareVersions(versionProject, versionRemote.toString())){
+                logger.log("An update is available : https://github.com/DamsDev1/DiscordOmegle");
             }
         });
     });
     req.on("error", (error) => {
-        Console.error(error);
+        logger.error(error);
     });
     req.end();
     
@@ -119,7 +133,7 @@ function updaterCheck(){
 
 // On Client Ready, check empty and waiting channels
 client.on("ready", async() => {
-    Console.log(`√   Logged into Discord as ${client.user.username}!`);
+    logger.log(`√   Logged into Discord as ${client.user.username}!`);
     client.user.setStatus("dnd");
 
     client.user.setPresence({
@@ -131,37 +145,23 @@ client.on("ready", async() => {
     });
 
     // Check waiting channel
-    Console.info("...   Check waiting channel");
+    logger.info("...   Check waiting channel");
     const waitChannelStart = client.channels.cache.filter( (c) => c.id === config.waitChannelID && c.type === "voice");
 
     for (const [channelID, channel] of waitChannelStart) {
         if(channel.members.size === 1){
             var guildChannel = client.guilds.cache.get(channel.guild.id);
-            guildChannel.channels.create("Vocal #" + Math.floor(generator.random()*10000), {
-                type: "voice",
-                userLimit: 2,
-                parent: "769953745500766238",
-                permissionOverwrites: [
-                    {
-                        id: channel.guild.id,
-                        deny: ["VIEW_CHANNEL"],
-                    },
-                ]
-            }).then( (vc) => {
-                for (const [memberID, member] of channel.members) {
-                    member.voice.setChannel(vc).catch( (err) => {Console.log(err);});
-                }
-            }).catch( (err) => { Console.log(err); });
+            createChannel(guildChannel, channel);
         }
     }
 
-    Console.log("√   Waiting channels checked !");
+    logger.log("√   Waiting channels checked !");
 
 
     // Check empty channels -> if empty, channel was deleted
-    Console.info("...   Check empty channels");
+    logger.info("...   Check empty channels");
     verifyVC();
-    Console.log("√   Empty channels checked !");
+    logger.log("√   Empty channels checked !");
     getUptime();
     updaterCheck();
 });
@@ -175,7 +175,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
                 
             // If no Channel exist in Category, we will create it.
             if(channels.size === 0){
-                createChannel(state);
+                createChannel(newState.guild, newState.channel);
             } else {
                 var n = 0; // Increment count
                 move:
@@ -190,7 +190,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
                                     continue;
                                 } else {
                                     dbCacheAddMatch(memberID, memberIDMove);
-                                    memberMove.voice.setChannel(channel).catch( (err) => { Console.log(err); });
+                                    memberMove.voice.setChannel(channel).catch(logger.error);
                                     break move;
                                 }
                             }
@@ -199,7 +199,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
 
                     // If loop increment equal channels size in category, create channel
                     if(n === channels.size){
-                        createChannel(state);
+                        createChannel(newState.guild, newState.channel);
                     }
                 }
             }
@@ -209,7 +209,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
     if(oldState.channel){
         if(oldState.channel.name.startsWith("Vocal") && oldState.channel.parentID === config.categoryID){
             if(oldState.channel.members.size === 0){
-                oldState.channel.delete("nobody in this channel").catch(Console.error);
+                oldState.channel.delete("nobody in this channel").catch(logger.error);
             }
         }
     }
