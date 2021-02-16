@@ -59,7 +59,7 @@ function createChannel(guild, channel){
 function verifyVC(){
     const channels = client.channels.cache.filter( (c) => c.parentID === config.categoryID && c.type === "voice");
 
-    for (const [channelID, channel] of channels) {
+    for (const [, channel] of channels) {
         if(channel.members.size === 0){
             channel.delete("making room for new channels").catch( logger.error);
         }
