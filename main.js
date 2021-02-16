@@ -10,6 +10,7 @@ client.login(config.token);
 
 // Init Number Randomizer
 var MersenneTwister = require("mersenne-twister");
+const { Console } = require("console");
 var generator = new MersenneTwister();
 
 
@@ -29,40 +30,40 @@ function getUptime(){
     } else {
         time = hours + "h";
     }
-    console.info("⬤   Uptime :" + time);
+    Console.info("⬤   Uptime :" + time);
     setTimeout( () => {
-        getUptime()
+        getUptime();
     }, 86400000);
 }
 
 // Verify if empty channel exist every 30s -> delete if true
-function VerifyVC(){
-    const channels = client.channels.cache.filter(c => c.parentID === config.categoryID && c.type === "voice");
+function verifyVC(){
+    const channels = client.channels.cache.filter( (c) => c.parentID === config.categoryID && c.type === "voice");
 
     for (const [channelID, channel] of channels) {
         if(channel.members.size === 0){
-            channel.delete("making room for new channels").catch( (err) => { console.log(err); });
+            channel.delete("making room for new channels").catch( (err) => { Console.log(err); });
         }
     }
     setTimeout( () => {
-       VerifyVC();
+       verifyVC();
     }, 30000);
 }
 
 // Add match to local database
-function DBCacheAddMatch(memberID, matchID){
+function dbCacheAddMatch(memberID, matchID){
     dbcache.set(`match_${memberID}-${matchID}`, {matchs: true }, config.secondsMatchTimeout);
 }
 
 // Verify if match exist in local databse
-function DBCacheVerifyMatch(memberID, matchID){
+function dbCacheVerifyMatch(memberID, matchID){
     var cache = dbcache.get(`match_${memberID}-${matchID}`);
-    console.log(cache);
+    Console.log(cache);
     if(cache){
         return true;
     } else {
         cache = dbcache.get(`match_${matchID}-${memberID}`);
-        console.log(cache);
+        Console.log(cache);
         if(cache) {
             return true;
         } else {
@@ -78,22 +79,22 @@ function updaterCheck(){
     var pjson = require("./package.json");
     var versionProject = pjson.version;
 
-    const https = require("https")
+    const https = require("https");
     const options = {
         hostname: "raw.githubusercontent.com",
         port: 443,
         path: "/DamsDev1/test/main/.version.json",
         method: "GET"
-    }
-    const req = https.request(options, res => {      
+    };
+    const req = https.request( options, (res) => {      
         res.on("data", versionRemote => {
             if(versionRemote > versionProject){
-                console.log("An update is : https://github.com/DamsDev1/test");
+                Console.log("An update is : https://github.com/DamsDev1/test");
             }
-        })
+        });
     });
-    req.on("error", error => {
-        console.error(error)
+    req.on("error", (error) => {
+        Console.error(error)
     });
     req.end();
     
@@ -101,7 +102,7 @@ function updaterCheck(){
 
 // On Client Ready, check empty and waiting channels
 client.on("ready", async() => {
-    console.log(`√   Logged into Discord as ${client.user.username}!`);
+    Console.log(`√   Logged into Discord as ${client.user.username}!`);
     client.user.setStatus("dnd");
 
     client.user.setPresence({
@@ -113,8 +114,8 @@ client.on("ready", async() => {
     });
 
     // Check waiting channel
-    console.info("...   Check waiting channel");
-    const waitChannelStart = client.channels.cache.filter(c => c.id === config.waitChannelID && c.type === "voice");
+    Console.info("...   Check waiting channel");
+    const waitChannelStart = client.channels.cache.filter( (c) => c.id === config.waitChannelID && c.type === "voice");
 
     for (const [channelID, channel10] of waitChannelStart) {
         if(channel10.members.size === 1){
@@ -131,19 +132,19 @@ client.on("ready", async() => {
                 ]
             }).then( (vc) => {
                 for (const [memberID, member] of channel10.members) {
-                    member.voice.setChannel(vc).catch( (err) => {console.log(err);});
+                    member.voice.setChannel(vc).catch( (err) => {Console.log(err);});
                 }
-            }).catch( (err) => {console.log(err);});
+            }).catch( (err) => { Console.log(err); });
         }
     }
 
-    console.log("√   Waiting channels checked !")
+    Console.log("√   Waiting channels checked !")
 
 
     // Check empty channels -> if empty, channel was deleted
-    console.info("...   Check empty channels");
-    VerifyVC();
-    console.log("√   Empty channels checked !");
+    Console.info("...   Check empty channels");
+    verifyVC();
+    Console.log("√   Empty channels checked !");
     getUptime();
     updaterCheck();
 });
@@ -155,7 +156,7 @@ client.on("ready", async() => {
 client.on("voiceStateUpdate", (oldState, newState) => {
     if (newState.channel){
         if ( (newState.channel.id === config.waitChannelID) && (newState.channel.members.size === 1)) {
-            const channels = client.channels.cache.filter(c => c.parentID === config.categoryID && c.type === "voice");
+            const channels = client.channels.cache.filter( (c) => c.parentID === config.categoryID && c.type === "voice");
                 
             // If no Channel exist in Category, we will create it.
             if(channels.size === 0){
@@ -171,9 +172,9 @@ client.on("voiceStateUpdate", (oldState, newState) => {
                     ]
                 }).then( (vc) => {
                     for (const [memberID, member] of newState.channel.members) {
-                        member.voice.setChannel(vc).catch( (err) => { console.log(err); });
+                        member.voice.setChannel(vc).catch( (err) => { Console.log(err); });
                     }
-                }).catch( (err) => { console.log(err); });
+                }).catch( (err) => { Console.log(err); });
             } else {
                 var n = 0; // Increment count
                 move:
@@ -183,12 +184,12 @@ client.on("voiceStateUpdate", (oldState, newState) => {
                         for (const [memberIDMove, memberMove] of newState.channel.members) {
                             for( const [memberID, member] of channel.members){
                                 // Verify if the member will be moved and member already in channel have already matched
-                                if(DBCacheVerifyMatch(memberID, memberIDMove)){
+                                if(dbCacheVerifyMatch(memberID, memberIDMove)){
                                     // Next Channel Check
                                     continue;
                                 } else {
-                                    DBCacheAddMatch(memberID, memberIDMove);
-                                    memberMove.voice.setChannel(channel).catch( (err) => { console.log(err); });
+                                    dbCacheAddMatch(memberID, memberIDMove);
+                                    memberMove.voice.setChannel(channel).catch( (err) => { Console.log(err); });
                                     break move;
                                 }
                             }
@@ -209,9 +210,9 @@ client.on("voiceStateUpdate", (oldState, newState) => {
                             ]
                         }).then( (vc) => {
                             for (const [memberID, member] of newState.channel.members) {
-                                member.voice.setChannel(vc).catch( (err) => { console.log(err); });
+                                member.voice.setChannel(vc).catch( (err) => { Console.log(err); });
                             }
-                        }).catch( (err) => { console.log(err); });
+                        }).catch( (err) => { Console.log(err); });
                     }
                 }
             }
@@ -221,7 +222,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
     if(oldState.channel){
         if(oldState.channel.name.startsWith("Vocal") && oldState.channel.parentID === config.categoryID){
             if(oldState.channel.members.size === 0){
-                oldState.channel.delete("nobody in this channel").catch(console.error);
+                oldState.channel.delete("nobody in this channel").catch(Console.error);
             }
         }
     }
