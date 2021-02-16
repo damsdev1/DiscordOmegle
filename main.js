@@ -16,6 +16,26 @@ var generator = new MersenneTwister();
         Start Init functions 
 ------------------------------- */
  
+// Add match to cache
+function dbCacheAddMatch(memberID, matchID){
+    dbcache.set(`match_${memberID}-${matchID}`, {matchs: true }, config.secondsMatchTimeout);
+}
+
+// Verify if match exist in cache
+function dbCacheVerifyMatch(memberID, matchID){
+    var cache = dbcache.get(`match_${memberID}-${matchID}`);
+    if(cache){
+        return true;
+    } else {
+        cache = dbcache.get(`match_${matchID}-${memberID}`);
+        if(cache) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 // Create channel in Discord
 function createChannel(guild, channel){
     guild.channels.create("Vocal #" + Math.floor(generator.random()*10000), {
@@ -81,26 +101,6 @@ function verifyVC(){
     setTimeout( () => {
        verifyVC();
     }, 30000);
-}
-
-// Add match to cache
-function dbCacheAddMatch(memberID, matchID){
-    dbcache.set(`match_${memberID}-${matchID}`, {matchs: true }, config.secondsMatchTimeout);
-}
-
-// Verify if match exist in cache
-function dbCacheVerifyMatch(memberID, matchID){
-    var cache = dbcache.get(`match_${memberID}-${matchID}`);
-    if(cache){
-        return true;
-    } else {
-        cache = dbcache.get(`match_${matchID}-${memberID}`);
-        if(cache) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }
 
 // Verify Update Github on start
