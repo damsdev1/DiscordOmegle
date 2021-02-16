@@ -33,7 +33,7 @@ function getUptime(){
     Console.info("⬤   Uptime :" + time);
     setTimeout( () => {
         getUptime();
-    }, 86400000);
+    }, 24*60*60*1000);
 }
 
 // Verify if empty channel exist every 30s -> delete if true
@@ -87,14 +87,14 @@ function updaterCheck(){
         method: "GET"
     };
     const req = https.request( options, (res) => {      
-        res.on("data", versionRemote => {
+        res.on("data", (versionRemote) => {
             if(versionRemote > versionProject){
                 Console.log("An update is : https://github.com/DamsDev1/test");
             }
         });
     });
     req.on("error", (error) => {
-        Console.error(error)
+        Console.error(error);
     });
     req.end();
     
