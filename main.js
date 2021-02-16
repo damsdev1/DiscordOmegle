@@ -36,6 +36,25 @@ function getUptime(){
     }, 24*60*60*1000);
 }
 
+
+function createChannel(state){
+    state.guild.channels.create("Vocal #" + Math.floor(generator.random()*10000), {
+        type: "voice",
+        userLimit: 2,
+        parent: config.categoryID,
+        permissionOverwrites: [
+            {
+                id: state.channel.guild.id,
+                deny: ["VIEW_CHANNEL"],
+            },
+        ]
+    }).then( (vc) => {
+        for (const [memberID, member] of state.channel.members) {
+            member.voice.setChannel(vc).catch( (err) => { Console.log(err); });
+        }
+    }).catch( (err) => { Console.log(err); });
+}
+
 // Verify if empty channel exist every 30s -> delete if true
 function verifyVC(){
     const channels = client.channels.cache.filter( (c) => c.parentID === config.categoryID && c.type === "voice");
@@ -71,8 +90,6 @@ function dbCacheVerifyMatch(memberID, matchID){
         }
     }
 }
-
-
 
 // Verify Update Github
 function updaterCheck(){
@@ -117,28 +134,28 @@ client.on("ready", async() => {
     Console.info("...   Check waiting channel");
     const waitChannelStart = client.channels.cache.filter( (c) => c.id === config.waitChannelID && c.type === "voice");
 
-    for (const [channelID, channel10] of waitChannelStart) {
-        if(channel10.members.size === 1){
-            var guildChannel = client.guilds.cache.get(channel10.guild.id);
+    for (const [channelID, channel] of waitChannelStart) {
+        if(channel.members.size === 1){
+            var guildChannel = client.guilds.cache.get(channel.guild.id);
             guildChannel.channels.create("Vocal #" + Math.floor(generator.random()*10000), {
                 type: "voice",
                 userLimit: 2,
                 parent: "769953745500766238",
                 permissionOverwrites: [
                     {
-                        id: channel10.guild.id,
+                        id: channel.guild.id,
                         deny: ["VIEW_CHANNEL"],
                     },
                 ]
             }).then( (vc) => {
-                for (const [memberID, member] of channel10.members) {
+                for (const [memberID, member] of channel.members) {
                     member.voice.setChannel(vc).catch( (err) => {Console.log(err);});
                 }
             }).catch( (err) => { Console.log(err); });
         }
     }
 
-    Console.log("√   Waiting channels checked !")
+    Console.log("√   Waiting channels checked !");
 
 
     // Check empty channels -> if empty, channel was deleted
@@ -150,8 +167,6 @@ client.on("ready", async() => {
 });
 
 
-
-
 // When user connect to channel, verify multiples things and move user
 client.on("voiceStateUpdate", (oldState, newState) => {
     if (newState.channel){
@@ -160,21 +175,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
                 
             // If no Channel exist in Category, we will create it.
             if(channels.size === 0){
-                newState.guild.channels.create("Vocal #" + Math.floor(generator.random()*10000), {
-                    type: "voice",
-                    userLimit: 2,
-                    parent: config.categoryID,
-                    permissionOverwrites: [
-                        {
-                            id: newState.channel.guild.id,
-                            deny: ["VIEW_CHANNEL"],
-                        },
-                    ]
-                }).then( (vc) => {
-                    for (const [memberID, member] of newState.channel.members) {
-                        member.voice.setChannel(vc).catch( (err) => { Console.log(err); });
-                    }
-                }).catch( (err) => { Console.log(err); });
+                createChannel(state);
             } else {
                 var n = 0; // Increment count
                 move:
@@ -198,21 +199,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
 
                     // If loop increment equal channels size in category, create channel
                     if(n === channels.size){
-                        newState.guild.channels.create("Vocal #" + Math.floor(generator.random()*10000), {
-                            type: "voice",
-                            userLimit: 2,
-                            parent: config.categoryID,
-                            permissionOverwrites: [
-                                {
-                                    id: newState.channel.guild.id,
-                                    deny: ["VIEW_CHANNEL"],
-                                },
-                            ]
-                        }).then( (vc) => {
-                            for (const [memberID, member] of newState.channel.members) {
-                                member.voice.setChannel(vc).catch( (err) => { Console.log(err); });
-                            }
-                        }).catch( (err) => { Console.log(err); });
+                        createChannel(state);
                     }
                 }
             }
