@@ -92,18 +92,18 @@ function dbCacheVerifyMatch(memberID, matchID){
 // Verify Update Github
 function updaterCheck(){
     var pjson = require("./package.json");
-    var versionProject = pjson.version
+    var versionProject = pjson.version;
 
     function compareVersions(version1, version2) {
 
-        version1 = version1.split('.');
-        version2 = version2.split('.');
+        version1 = version1.split(".");
+        version2 = version2.split(".");
     
         var maxSubVersionLength = String(Math.max.apply(undefined, version1.concat(version2))).length;
     
         var reduce = function(prev, current, index) {
     
-            return parseFloat(prev) + parseFloat('0.' + Array(index + (maxSubVersionLength - String(current).length)).join('0') + current);
+            return parseFloat(prev) + parseFloat("0." + Array(index + (maxSubVersionLength - String(current).length)).join("0") + current);
         };
     
         return version1.reduce(reduce) < version2.reduce(reduce);
