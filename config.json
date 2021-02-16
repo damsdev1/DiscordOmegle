@@ -1,7 +1,7 @@
 {
     "token": "",
     "prefix": "!",
-    "waitChannel_ID": "",
-    "category_ID": "",
+    "waitChannelID": "",
+    "categoryID": "",
     "secondsMatchTimeout": "120"
 }
