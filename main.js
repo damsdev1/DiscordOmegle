@@ -49,7 +49,7 @@ function createChannel(guild, channel){
             },
         ]
     }).then( (vc) => {
-        for (const [memberID, member] of channel.members) {
+        for (const [, member] of channel.members) {
             member.voice.setChannel(vc).catch( logger.error );
         }
     }).catch( logger.error);
@@ -131,6 +131,7 @@ function updaterCheck(){
     
 }
 
+
 // On Client Ready, check empty and waiting channels
 client.on("ready", async() => {
     logger.log(`√   Logged into Discord as ${client.user.username}!`);
@@ -148,7 +149,7 @@ client.on("ready", async() => {
     logger.info("...   Check waiting channel");
     const waitChannelStart = client.channels.cache.filter( (c) => c.id === config.waitChannelID && c.type === "voice");
 
-    for (const [channelID, channel] of waitChannelStart) {
+    for (const [, channel] of waitChannelStart) {
         if(channel.members.size === 1){
             var guildChannel = client.guilds.cache.get(channel.guild.id);
             createChannel(guildChannel, channel);
@@ -179,11 +180,11 @@ client.on("voiceStateUpdate", (oldState, newState) => {
             } else {
                 var n = 0; // Increment count
                 move:
-                for (const [channelID, channel] of channels) {
+                for (const [, channel] of channels) {
                     n++;
                     if(channel.members.size === 1){
                         for (const [memberIDMove, memberMove] of newState.channel.members) {
-                            for( const [memberID, member] of channel.members){
+                            for( const [memberID] of channel.members){
                                 // Verify if the member will be moved and member already in channel have already matched
                                 if(dbCacheVerifyMatch(memberID, memberIDMove)){
                                     // Next Channel Check
