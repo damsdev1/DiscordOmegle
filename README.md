@@ -1,4 +1,5 @@
 # DiscordOmegle
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/51ffd6a17f084b0fa4c6736c6f5b4333)](https://app.codacy.com/gh/DamsDev1/DiscordOmegle?utm_source=github.com&utm_medium=referral&utm_content=DamsDev1/DiscordOmegle&utm_campaign=Badge_Grade_Settings)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/e256c90d4f0e48efa4d7395288c256a9)](#)
 [![Size](https://img.shields.io/github/repo-size/DamsDev1/DiscordOmegle)](#) [![Licence](https://img.shields.io/github/license/DamsDev1/DiscordOmegle)](#)
 
