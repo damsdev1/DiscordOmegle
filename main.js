@@ -127,7 +127,7 @@ client.on("ready", async() => {
     const channels = client.channels.cache.filter( (c) => c.parentID === config.categoryID && c.type === "voice");
     
 
-    if(waitChannel.type === 'voice' && waitChannel.members.size === 1 ){
+    if(waitChannel.type === "voice" && waitChannel.members.size === 1 ){
         channelCheck(channels, waitChannel, waitChannel.members);
     } else {
         for (const [memberID, member] of waitChannel.members) {
