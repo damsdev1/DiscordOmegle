@@ -1,7 +1,0 @@
-node_modules/
-.vscode/
-Backup/
-.gitignore
-nodemon.json
-TODO
-config.test.json
