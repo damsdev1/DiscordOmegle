@@ -1,0 +1,26 @@
+{
+  "name": "omeglebot",
+  "version": "1.0.1",
+  "description": "Omegle Bot",
+  "main": "main.js",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "mersenne-twister": "^1.1.0",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node main.js",
+    "test": "nodemon --config nodemon.json dev.js"
+  },
+  "keywords": [
+    "Omegle",
+    "BOt"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/DamsDev1/DiscordOmegle.git"
+  },
+  "author": "DamsDev.me",
+  "license": "ISC"
+}
