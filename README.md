@@ -22,5 +22,5 @@ This project aims to provide Discord bot works like https://omegle.com. Omegle i
 
 
 ### How to get Discord ID
-![Discord Settings Enable Dev](https://github.com/DamsDev1/DiscordOmegle/blob/images/enable-dev.jpeg?raw=true)
-![Copy ID of Channel](https://github.com/DamsDev1/DiscordOmegle/blob/images/copy_id.png?raw=true)
+![Discord Settings Enable Dev](https://i.imgur.com/FTLtZpa.jpg)
+![Copy ID of Channel](https://i.imgur.com/pLDWZrd.png)
