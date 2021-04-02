@@ -6,6 +6,8 @@
 This project aims to provide Discord bot works like https://omegle.com. Omegle is a free online chat and support webcams. However, when using webcams, our IP address is visible to the other person, as opposed to Discord.
 
 ## Getting started
+#### Install dependencies
+Run the command `npm install`
 #### Configure `config.json`
 ```json
 {
