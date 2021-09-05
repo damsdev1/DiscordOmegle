@@ -1,5 +1,5 @@
 # DiscordOmegle
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/452da3c37b2144e98c077843ab51bde1)](#)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/601bc8bb90b14eda8aedba5d7efc73cd)](#)
 [![Size](https://img.shields.io/github/repo-size/DamsDev1/DiscordOmegle)](#) [![Licence](https://img.shields.io/github/license/DamsDev1/DiscordOmegle)](#)
 
 ## Project
